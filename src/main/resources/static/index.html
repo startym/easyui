@@ -1,0 +1,132 @@
+<html>
+  <head>
+    <title>index</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link id='easyuiTheme' rel="stylesheet" href="resources/themes/default/easyui.css" type="text/css"></link>
+	<link rel="stylesheet" href="resources/themes/icon.css" type="text/css"></link>
+	<script type="text/javascript" src="resources/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="resources/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="resources/locale/easyui-lang-zh_CN.js"></script>
+	<script type="text/javascript" src="resources/jquery.cookie.js"></script>
+	
+	<script type="text/javascript">
+
+		$(function(){
+			
+			function addTab(title, src){				
+				if ($('#tt').tabs('exists', title)){
+			        $('#tt').tabs('select', title);
+			    } else {
+			    	//var content = '<iframe scrolling="auto" frameborder="0"  src="view.action" style="width:100%;height:100%;"></iframe>';
+			        var content = '<iframe scrolling="auto" frameborder="0"  src="'+src+'" style="width:100%;height:100%;"></iframe>';
+			        $('#tt').tabs('add',{
+			            title:title,	
+			            //href:src, //src //显示网页中body部分
+			            content:content,	   //使用iframe不能直接href,除非使用的简单无样式页面
+			            closable:true
+			        });
+			    }
+			}
+
+			$('.aa').click(function() {
+				var $this = $(this);
+				var href = $this.attr('src');				
+				var title = $this.html();
+				addTab(title, href);
+			});
+
+			$('#up').click(function() {
+				var tab = $('#tt').tabs('getSelected');  
+				$('#tt').tabs('update', {
+					tab: tab,
+					options: {
+						title: '新标题',						
+						content:'<iframe scrolling="auto" frameborder="0"  src="select.html" style="width:100%;height:100%;"></iframe>'
+					}
+				});
+			});
+
+			//使用Panel中继承的方法
+			$('#rf').click(function() {
+				var tab = $('#tt').tabs('getSelected');  
+				//使用页面或action刷新tab				
+				tab.panel('refresh', 'refresh.html');
+			});
+
+
+			//更换皮肤
+			changeTheme=function(themeName){
+				
+				var $theme = $('#easyuiTheme');
+				var url = $theme.attr('href');
+				var href = url.substring(0,url.indexOf('themes'))+'themes/'+themeName+'/easyui.css';
+				//更改当前页的主题
+				$theme.attr('href',href);
+
+				//更换页面中iframe嵌入的页面皮肤								
+				var $iframe = $('iframe');
+				if($iframe.length>0){
+					for(var i=0;i<$iframe.length;i++){
+						var ifr = $iframe[i];
+						$(ifr).contents().find('#easyuiTheme').attr('href',href);
+					}
+				}
+
+				//cookie插件
+				$.cookie('themeName',themeName,{
+			   		expires : 7
+				});
+			}
+					
+		});
+		
+	</script>
+	
+  </head>
+  
+ <body class="easyui-layout">   
+    
+	    <div data-options="region:'north',split:false,border:false" style="height:60px;">	    	
+	    	<h3>
+	    	<a href='javascript:void(0)' onclick="changeTheme('default');">default</a>
+	    	<a href='javascript:void(0)' onclick="changeTheme('bootstrap');">bootstrap</a>
+	    	<a href='javascript:void(0)' onclick="changeTheme('black');">black</a>
+	    	<a href='javascript:void(0)' onclick="changeTheme('gray');">gray</a>	    	
+	    	<a href='javascript:void(0)' onclick="changeTheme('metro');">metro</a>
+	    	<a href='javascript:void(0)' onclick="changeTheme('material');">material</a>
+	   		</h3>
+	    </div>   
+	    
+	    
+	    <div data-options="region:'west'" style="width:295px;">
+	    	
+	    	<div id="aa" class="easyui-accordion" style="width:293px;height:100%;">   
+			    <div title="Title1" data-options="iconCls:'icon-save',selected:true" style="overflow:auto;padding:10px;">   
+			        <a class='aa' src='select.html' href="javascript:void(0)">主页</a><br/>
+	    			<a class='aa' src='tree.html' href="javascript:void(0)">树页面</a><br/>
+	    			<a class='aa' src='datagrid2.html' href="javascript:void(0)">用户管理</a>
+			    </div>   
+			    <div title="Title2" data-options="iconCls:'icon-reload'" style="padding:10px;">   
+			        <a id='up' href="javascript:void(0)">update</a> <br/>
+			        <a id='rf' href="javascript:void(0)">refresh</a> 
+			    </div>   
+			    <div title="Title3">   
+			        content3    
+			    </div>   
+			</div>  
+	    </div>  
+	     
+		<%-- 面板中使用href属性的时候被引用的页面只用body标签，tab必须写全 --%>
+	    <div data-options="region:'center',split:false" style="padding:5px;background:#eee;">	    
+	    	<div id="tt" class="easyui-tabs" data-options="fit:true"  border="false" >
+	    		<div title="主页" data-options="closable:false">
+	    			<h1>默认主页</h1>
+    			</div>
+	    	</div>
+	    </div>   
+ 
+		<div data-options="region:'south',split:false,border:false" style="height:60px;text-align:center">
+			<h2>Copyright Cssl@163.com</h2>
+		</div>   
+</body> 
+</html>

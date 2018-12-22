@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cssl.dao.UsersDao">
+
+	<insert id="save" parameterType="Users" keyColumn="id" keyProperty="id">
+		insert into users(bornDate,password,username,house_hid) values(#{bornDate},#{password},#{username},#{house.hid})
+	</insert>
+		
+	<update id="updateUsers" parameterType="Users">
+		update users set username=#{username},
+				password=#{password},
+				bornDate=#{bornDate},
+				house_hid=#{house.hid}
+			where id=#{id}
+	</update>
+	
+	<delete id="deleteUsers" parameterType="list">
+		delete from users where id in
+		<foreach item="item" index="index" collection="list"
+      		open="(" separator="," close=")">
+        	#{item}
+  		</foreach>	
+	</delete>
+		
+ 	<select id='findUsersCount' resultType='long'>
+ 		select count(id) from users u <include refid="condition"/>
+ 	</select>
+ 	
+ 	<!-- 关联映射 -->
+ 	<resultMap type="Users" id="uh">
+		<id property="id" column="id"/>
+		<association property="house" javaType="House"/>
+	</resultMap>
+
+	<select id='findAllUsers' resultMap="uh">
+ 		select * from users u inner join house h on u.house_hid=h.hid limit #{page},#{rows}
+ 	</select>
+ 	
+ 	<sql id="condition">
+ 	  <where>
+ 		<if test="id!=null and id!=0">
+ 			u.id=#{id}
+ 		</if>
+ 		<if test="username!=null and username!=''">
+ 			or u.username like concat('%',#{username},'%')
+ 		</if>
+ 	  </where>
+ 	</sql>
+ 	
+ 	<select id='findByCondition' resultType="map">
+ 		select * from users u inner join house h on u.house_hid=h.hid 
+ 			<include refid="condition"/>
+ 			order by ${sort} ${order} limit #{page},#{rows}
+ 	</select>
+  
+  
+  
+</mapper>

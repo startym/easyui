@@ -1,0 +1,99 @@
+<html>
+  <head>
+    <title>select</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="resources/themes/default/easyui.css" type="text/css"></link>
+    <link rel="stylesheet" href="resources/themes/icon.css" type="text/css"></link>
+	<script type="text/javascript" src="resources/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="resources/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="resources/locale/easyui-lang-zh_CN.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			//省
+			$('#cc1').combobox({    
+			    url:'combox.action',    
+			    valueField:'id',    
+			    textField:'text',
+			    editable:false,		//不可编辑,继承自combo
+			    onSelect: function(rec){
+			    	//alert(rec.id+':'+rec.text);
+		            $('#cc2').combobox('reload', 'combox2.action?id='+rec.id);
+		        }
+			});			
+			
+
+			$('#cc').combogrid({    
+			    delay: 500,    
+			    //mode: 'remote',   //远程 
+			    url: 'combogrid.action',    
+			    idField: 'id',    
+			    textField: 'username',    
+			    columns: [[    
+			        {field:'id',title:'编号',width:100,sortable:true},    
+			        {field:'username',title:'用户名',width:150,sortable:true},
+			        {field:'password',title:'密码',width:150,sortable:true},
+			        {field:'bornDate',title:'日期',width:100,sortable:true}
+			    ]]   
+			});  
+			
+			
+			$('#ff').form('load',{
+				name:'name2',
+				email:'mymail@gmail.com'
+			});
+				
+		})
+		
+		//设置选择某个选项
+		function load(){
+		 var data = $('#cc3').combobox('getData');
+		 //alert(data);
+		 $('#cc3').combobox('select',data[1].id);
+		 }
+		 window.setTimeout("load()", 2000);
+		
+		//自定义格式必须同时重写两个函数,否则只会选择当天
+		function fmt(date){
+			var y = date.getFullYear();
+			var m = date.getMonth()+1;
+			var d = date.getDate();			
+			return y+'/'+m+'/'+d;
+			//return y+'/'+(m<10?('0'+m):m)+'/'+(d<10?('0'+d):d);
+		}
+		
+		function per(s) {
+            var t = Date.parse(s);
+			if (!isNaN(t)){
+				return new Date(t);
+			} else {
+				return new Date();
+			}
+        }
+	</script>
+  </head>
+  
+  <body>
+  
+    <form id="ff" method="post">   
+	    <div>
+			<input id="d1" name="name1" class="easyui-datebox" required="required">
+			<input id="dd" name="name2" data-options="formatter:fmt,parser:per" class="easyui-datebox" required="required">
+	    </div>	    
+	</form> 
+  	
+  	<input id="cc"  name="username" style="width:520px" value='请选择'/>	    
+  	
+  	<br/><br/>
+
+  	<input id="cc3" class="easyui-combobox" name="dept" value="请选择省份"   
+    	data-options="valueField:'id',textField:'text',url:'combox.action',editable:true" />  
+  	
+  	<!-- 省市级联 -->
+    <input id="cc1" name="province" style="width:100px;" value='请选择'/>	    
+
+	<input id="cc2" class="easyui-combobox" name="city" style="width:100px;" 
+		data-options="valueField:'uid',textField:'text'" value="请选择"/>	    
+	   
+		
+  </body>
+</html>

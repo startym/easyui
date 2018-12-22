@@ -1,0 +1,82 @@
+<html>
+  <head>
+    <title>datagrid</title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="resources/themes/default/easyui.css" type="text/css"></link>
+    <link rel="stylesheet" href="resources/themes/icon.css" type="text/css"></link>
+	<script type="text/javascript" src="resources/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="resources/jquery.easyui.min.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			$('#dg').datagrid({    
+			    url:'dataGrid.action?pass=123',
+			    striped:true,    	//斑马线效果
+			    singleSelect:true,
+			    fitColumns:true,	  //匹配列宽
+			    fit:true,			  //匹配父容器
+                autoRowHeight:true, //行高设置,冻结列后图片的行高要高于冻结列行高
+			    pagination:true,
+                pagePosition:'top',
+                pageSize: 3,
+                pageList: [3, 6, 9, 12],
+                rownumbers: true,
+			    queryParams:{
+		  			uname: 'easyui'
+		  		},
+                loadMsg: '正在加载数据.......',
+                /*rowStyler: function(index,row){
+                    return 'background-color:#ccc';
+                },*/
+                frozenColumns:[[
+			    	{field:'id',title:'用户编号',width:100,resizable:false,
+			    		styler:function(value){						
+							if(value<35){
+								return  'color:red;';
+							}else{
+								return  'color:blue;';
+							}
+						 }
+				    },
+			    	{field:'username',title:'用户名称',width:100}
+			    ]],
+			    columns:[[			            
+			        {field:'password',title:'用户密码',width:100,align:'right'},
+			        {field:'bornDate',title:'出生日期',width:200,align:'center'},
+			        {field:'house.name',title:'家庭住址',width:200,align:'right',
+			        	formatter: function(value,row,index){			        		
+							if (row.house){
+								return row.house.name;
+							} 
+						}
+			        },
+			        {field:'path',title:'图片',width:200,align:'right',
+			        	formatter: function(value,row,index){
+							return '<img height="46px" src="'+row.path+'"/>';
+						}
+			        }
+			    ]]    
+			});
+
+            var pager = $('#dg').datagrid('getPager');
+            pager.pagination({
+                beforePageText: '第',
+                afterPageText: '页, 共 {pages} 页',
+                displayMsg:'显示第 {from} 到 {to} 条记录，共 {total} 条记录'
+                //layout:['first','prev','links','next','last','manual'],
+                //links:3
+            });
+
+        })
+		
+
+		
+	</script>
+  </head>
+  
+  <body>
+  	datagrid.html
+  	
+    <table id="dg"></table>  
+
+  </body>
+</html>

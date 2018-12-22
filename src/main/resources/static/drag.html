@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <title>拖放本地图片到网页中</title>
+	<meta charset="UTF-8">
+
+	<style>  
+		.box{  
+	            width: 500px;  
+	            height:500px;
+	            overflow: visible;	                  
+	      }  
+	     #box1{ background-color: #cccccc;   } 
+	</style> 
+	<script type="text/javascript">
+	
+	var box1,msg;
+	window.onload=function(){
+		box1=document.getElementById("box1");
+            msg=document.getElementById("msg");
+            box1.ondragover=function(e){
+                e.preventDefault();
+            }
+            box1.ondrop=function(e){/*放置图片时*/
+                e.preventDefault();
+			getObj(e);
+			//取得拖进来的文件
+			var f=e.dataTransfer.files[0];
+			var fr=new FileReader();
+			
+			fr.onload=function(e){
+				
+				getObj(e.target);
+				box1.innerHTML="<img src=\""+fr.result+"\"/>";
+				//alert(fr.result);
+			}
+			fr.readAsDataURL(f);
+			
+			//ajax上传
+			//var formData=new FormData();
+	        //相当于 <input type=file name='myfile' />
+	        //formData.append("myfile",f);
+	        //使用ajax异步上传，暂时不考虑兼容性
+	        //var xmlHttp=newXMLHttpRequest();
+	        //必须使用post才能提交文件类型的数据，即大量的数据
+	        //xmlHttp.open("post","xxx.do");
+	        //发送表单数据，然后服务端使用myfile这个名称接收即可
+	        //xml.send(formData);
+		}	
+		
+	}
+
+	/*打印拖动时的各种参数*/  
+	function getObj(e){
+	    var s="";  
+	    for(var k in e){  
+	        s+=k+":"+e[k]+"</br>";  
+	    }  
+	    //msg.innerHTML=s;  
+	}  
+		
+
+	</script>
+  </head>
+  
+  <body>
+  	拖放本地图片到网页中
+	<div id="box1" class="box"></div><!--目标拖动进入的区域-->  
+         
+	<div id="msg" class="box"></div><!--输出，打印拖动图片时各种参数-->    
+
+   
+  </body>
+</html>

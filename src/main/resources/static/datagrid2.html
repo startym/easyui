@@ -1,0 +1,330 @@
+<html>
+  <head>
+    <title>datagrid2</title>
+	<meta charset="UTF-8">
+	<link id='easyuiTheme' rel="stylesheet" href="resources/themes/default/easyui.css" type="text/css"></link>
+	<link rel="stylesheet" href="resources/themes/icon.css" type="text/css"></link>
+	<script type="text/javascript" src="resources/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="resources/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="resources/locale/easyui-lang-zh_CN.js"></script>
+	<script type="text/javascript" src="resources/jquery.cookie.js"></script>
+		
+	<script>	
+		//编辑的行索引
+		var editRow = null;		
+		$(function(){
+			//添加方法	
+			function addData(){				
+				if(editRow!=null){
+					//取消当前正在编辑的行
+	  				$dgg.datagrid('cancelEdit',editRow);
+	  				editRow=null;	  					 					
+	  			}
+	  			if(editRow==null){
+	  				$dgg.datagrid('insertRow',{
+			  			index: 0,	// 索引从0开始
+			  			row: {
+							id:0,
+							username:'输入用户名',
+							password:'请输入密码'
+			  			}
+			  		});
+	  				editRow=0;	
+	  				//将索引为editRow的行变成可编辑状态
+	  				$dgg.datagrid('beginEdit',editRow);	
+	  			}	  
+			}	
+
+			//编辑方法
+			function updateData(rowIndex){
+				if(editRow!=null){
+					$dgg.datagrid('cancelEdit',editRow);
+					editRow=null;
+				}
+				
+				if(rowIndex){
+					//直接双击或右击					
+					editRow=rowIndex;
+					$dgg.datagrid('beginEdit',rowIndex);	
+					$dgg.datagrid('unselectAll');
+				}else{						
+		  			var rows = $dgg.datagrid('getSelections');
+		  			//只能选择一行编辑
+		  			if(rows.length==1){		  				
+		  				if(editRow==null){	
+			  				//获得选中行索引		  		
+		  					editRow = $dgg.datagrid('getRowIndex',rows[0]);
+							$dgg.datagrid('beginEdit',editRow);							
+		  				}						
+		  			}else{
+						$.messager.alert('提示','请选择要编辑的一行');
+		  			}
+				}							
+	  		}	
+
+			//删除方法
+	  		function deleteData(){
+			    //获取所有选中的行
+	  			var rows = $dgg.datagrid('getSelections');
+	  			
+	  			if(rows.length>0){
+	  				if(editRow!=null){
+						$dgg.datagrid('cancelEdit',editRow);
+					}
+					$.messager.confirm('确定','您确定要删除选定的记录？',function(r){
+						if(r){
+                            //获取要删除的id数组
+                            var ids = [];
+                            $(rows).each(function(i,obj){
+                                ids.push(obj.id);
+                            });
+                            console.info(ids);
+							$.ajax({
+								url:'dataDel.action',							
+								data:{id:ids.join(',')}, //1,3,5
+								dataType:'json',
+								success:function(r){
+									if(r.flag){
+										$.messager.show({
+											title:'消息',
+											msg:r.message
+										});										
+										$dgg.datagrid('reload');	
+										$dgg.datagrid('unselectAll');
+									}else{
+										$.messager.alert('消息',r.message);
+									}											
+									editRow = null;
+								}
+							});							
+						}
+					});					
+	  			}else{
+					$.messager.alert('提示','请选择要删除的行','warning');
+	  			}
+		  	}
+
+			//DataGrid
+			var $dgg = $('#dg').datagrid({			  	
+		  	    url:'dataGrid2.action', //要有url点击翻页才会发请求
+		  	    striped:true,			//隔行变色
+		  	    fitColumns:true,		//匹配列宽，false使用固定值
+		  	    fit:true,				//匹配父容器，panel属性
+		  	    nowrap:true,			//列不够是否自动换行,true表示不换行
+		  	  	singleSelect:false,
+		  	    //分页控件
+		  	    pagination:true,
+		  	  	pagePosition:'top',
+		  	    pageSize:5,
+		  	    pageList:[5,10,15,18],		  	   	
+		  	    //排序
+		  	    sortName:'id',
+		  	    sortOrder:'desc',
+                loadMsg:'正在加载数据...',
+		  	    //冻结列
+		  	    frozenColumns:[[
+					{field:'id',title:'序号',width:100,sortable:true,
+						styler:function(value){						
+							if(value<30){
+								return  'color:red;';
+							}else{
+								return  'color:blue;';
+							}
+						 }
+					},					  
+					  //{field:'id',title:'序号2',width:100,sortable:true,formatter:function(value,row){
+							//同一属性写多次function只会执行第一次的，以下代码无效
+						  	//alert(value);							
+					  	  	//return '333';
+					  //}},   
+					  {field:'username',title:'用户名',width:100,
+					  	formatter:function(value,row){
+					  	  	return '<span title=提示:"'+value+'">'+value+'</span>';
+					  	},
+					      editor:{
+					      	type:'validatebox',
+					      	options:{required:true}
+					      }
+					  } 
+			  	]],    
+		  	    columns:[[ 		  	           
+		  	        {field:'password',title:'密码',width:100,
+			  	        editor:{
+			  	        	type:'validatebox',
+			  	        	options:{required:true}
+		  	            }
+		  	        }, 
+		  	 		//视图映射
+		  	        {field:'house.hid',title:'房屋地址',width:200,
+			  	        formatter:function(value,row){	
+			  	        	//return row.name;
+			  	        	/*if(row.name.length>6){ //造成新增无法编辑
+			  	        		return "<span title='"+row.hid+"'>"+row.name+"</span>";
+			  	        	}*/			  	        							
+							return "<span title='"+row.name+"'>"+row.name+"</span>";								
+						},editor:{
+			  	        	type:'combobox',
+			  	        	options:{
+			  	        		url:'house.action',
+			  	        		valueField: 'hid',
+								textField: 'name'
+			  	        	}
+		  	            }			  	       
+			  	    },
+			  	    {field:'bornDate',title:'时间',width:400,
+				  	    editor:{type:'datebox',options:{}}}			  	   
+		  	    ]],
+			  	toolbar: [{
+				  	text: '添加',
+			  		iconCls: 'icon-add',
+			  		handler: function(){	
+			  			//alert('准备添加');
+			  			addData();
+			  		}
+			  	},'-',{
+			  		text: '编辑',
+			  		iconCls: 'icon-edit',
+			  		handler: function(){
+			  			updateData();						
+			  		}
+			  	},'-',{
+				  	text: '删除',
+			  		iconCls: 'icon-remove',
+			  		handler: function(){
+			  			deleteData();
+			  		}
+			  	},'-',{
+				  	text: '保存',
+			  		iconCls: 'icon-save',
+			  		handler: function(){			  			
+						if(editRow!=null){							
+							//触发onAfterEdit事件
+							$dgg.datagrid('endEdit',editRow);
+						}											
+			  		} 
+			  	},'-',{
+				  	text: '取消编辑',
+			  		iconCls: 'icon-back',
+			  		handler: function(){			  			
+						$dgg.datagrid('rejectChanges');	//撤销修改内容
+						$dgg.datagrid('unselectAll');	//取消选择
+						editRow=null;
+			  		}
+			  	}],
+			  	//结束编辑时触发,实现新增和修改到后台			  	
+			  	onAfterEdit:function(rowIndex,rowData,change){
+			  		//{bornDate: "2017-09-01", house.hid: "1", id: 0, password: "123", Symbol()_m.ofj99eqljtu: undefined, username: "余帅"}
+					console.info(rowData);				
+					
+					//验证通过才会发该请求
+					$.ajax({
+						url:'edit.action',
+						data:rowData, //{id:11,username:'admin'} id=11&username=admin
+						dataType:'json',
+						type:'post',
+						success:function(m){						
+							if(m.flag){
+								$.messager.show({
+									title:'消息',
+									msg:m.message,
+									timeout:5000,
+									showType:'slide'
+								});								
+								//完成后刷新datagrid								
+								$dgg.datagrid('load');
+							}else{
+								$.messager.alert('消息',m.message);
+								$dgg.datagrid('rejectChanges');
+							}							
+							editRow = null;
+						}					
+					});						
+				},
+			  	//双击编辑
+			  	onDblClickRow:function(rowIndex,rowData){
+			  		updateData(rowIndex);			  		
+				},
+				//右键菜单				
+				onRowContextMenu:function(e, rowIndex, rowData){
+					//只能采用阻止默认事件			
+					e.preventDefault();
+					//取消原来的选中行
+					$dgg.datagrid('unselectAll');
+					//右键选中行
+					$dgg.datagrid('selectRow',rowIndex);
+					//弹出右键菜单
+					$('#mm').menu('show', {
+						  left: e.pageX,
+						  top: e.pageY  
+					});
+				}		  		 	        
+		  	}); 			
+			
+			//菜单点击事件			
+			$('#mm').menu({    
+			    onClick:function(item){ 			       
+			        if(item.name=='add'){
+			        	addData();
+			        }else if(item.name=='edit'){				       
+						updateData();
+			        }else if(item.name=='exit'){
+						$('#mm').menu('hide');
+				    }else if(item.name=='remove'){
+						alert('remove');
+						deleteData();
+			        } 
+			    }		 
+			});
+
+			//将form表单元素序列化成JSON对象
+			serializeToObject=function(form){
+				//[{name:"id",value:"29"},{name:"username",value:"admin"}]
+				//{id:29,username:"admin"}
+				var o = {};	
+				$.each(form.serializeArray(),function(index){
+					if(o[this['name']]){
+						o[this['name']]=o[this['name']]+','+this['value'];
+					}else{
+						//{id:11,username:"admin"}
+						o[this['name']]=this['value'];
+					}
+				});
+				return o;
+			}
+
+			//查询
+			$('#qry').click(function(){					
+				//alert($('#fm').serialize());
+				//alert($('#fm').serializeArray());
+				//alert($.param($('#fm').serializeArray()));
+				alert(JSON.stringify($('#fm').serializeArray()));
+				alert(JSON.stringify(serializeToObject($('#fm'))));
+				
+				$('#dg').datagrid('load',serializeToObject($('#fm')));				
+			}); 				
+		});		
+	  	
+  	</script>
+  </head>
+  
+  <body>  
+    <form id='fm' style="margin-top: 20px">
+	  	编号：<input type="text" id='id' class="easyui-textbox" name="id" />
+		用户名：<input type="text" id='username' class="easyui-textbox" name="username" />
+		<a id="qry" href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'">查询</a> 		
+		<a id="cls" href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'">清空</a> 		
+	</form>   
+    
+     <!-- 右键菜单 -->
+	<div id="mm" class="easyui-menu" style="width:120px;display:none;">
+		<div data-options="name:'add',iconCls:'icon-add'">添加</div>
+		<div data-options="name:'edit',iconCls:'icon-edit'">编辑</div>
+		<div data-options="name:'remove',iconCls:'icon-remove'">删除</div>
+		<div class="menu-sep"></div>
+		<div data-options="name:'exit',iconCls:'icon-exit'" >退出</div>
+	</div>
+
+	<table id="dg"></table>
+     
+  </body>
+</html>

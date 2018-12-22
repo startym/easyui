@@ -1,0 +1,72 @@
+<html>
+  <head>
+    <title>tree</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" href="resources/themes/default/easyui.css" type="text/css"></link>
+    <link rel="stylesheet" href="resources/themes/icon.css" type="text/css"></link>
+	<script type="text/javascript" src="resources/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="resources/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="resources/locale/easyui-lang-zh_CN.js"></script>
+
+  </head>
+  
+  <body>
+    <div style="margin:10px 0;">
+		<a href="javascript:void(0)" class="easyui-linkbutton" onclick="getChecked()">GetChecked</a> 
+		<br/>
+		<input type="checkbox" checked onchange="$('#tt').tree({cascadeCheck:$(this).is(':checked')})">CascadeCheck 
+		<input type="checkbox" onchange="$('#tt').tree({onlyLeafCheck:$(this).is(':checked')})">OnlyLeafCheck
+	</div>
+	
+	<ul id="tt" class="easyui-tree" data-options="url:'tree.action',lines:true,method:'get',dnd:true,animate:true,checkbox:true"></ul>
+	
+	<div id="mm" class="easyui-menu" style="width:120px;">
+		<div onclick="append()" data-options="iconCls:'icon-add'">追加</div>
+		<div onclick="remove()" data-options="iconCls:'icon-remove'">移除</div>
+	</div>
+	
+	<script type="text/javascript">
+
+		$(function(){
+			$tr=$('#tt').tree({
+				url:'tree.action',		
+				onDblClick:function(node){
+					//只有页节点执行业务
+					if($tr.tree('isLeaf',node.target)){
+						alert(node.id+':'+node.text);
+						$tr.tree('beginEdit',node.target);
+					}											
+				},
+				onContextMenu: function(e, node){
+					e.preventDefault();
+					// 查找节点
+					$('#tt').tree('select', node.target);
+					// 显示快捷菜单
+					$('#mm').menu('show', {
+						left: e.pageX-100,
+						top: e.pageY
+					});
+				},							
+				onAfterEdit: function(node){
+					alert(node.id+":"+node.text);
+					//ajax
+				}			
+			});
+		})
+	
+		function getChecked(){
+			var nodes = $('#tt').tree('getChecked');
+			var s = '';
+			for(var i=0; i<nodes.length; i++){
+				if (s != '') s += ',';
+				s += nodes[i].id+':'+nodes[i].text;
+			}
+			alert(s);
+			
+			//根据选择重新请求后台加载数
+			
+			//$('#tt').tree('reload');
+		}
+	</script>
+  </body>
+</html>

@@ -1,0 +1,68 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>jQuery EasyUI</title>
+	<link rel="stylesheet" href="resources/themes/default/easyui.css" type="text/css"></link>
+    <link rel="stylesheet" href="resources/themes/icon.css" type="text/css"></link>	
+</head>
+<body>
+	
+  	<script type="text/javascript" src="resources/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="resources/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="resources/locale/easyui-lang-zh_CN.js"></script>
+	<script type="text/javascript" src="resources/jquery.edatagrid.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			$('#tt').edatagrid({
+				url:"edatagrid.action",
+				saveUrl:"addRow.action",
+				updateUrl:"updateRow.action",
+				destroyUrl:"destroyRow.action",
+				singleSelect:false,		//多行删除连续调用destroyRow.action
+				destroyMsg:{
+					norecord:{    		// 在没有记录选择的时候执行
+						title:'警告',
+						msg:'没有记录选中!'
+					},
+					confirm:{     		// 在选择一行的时候执行		title:'Confirm',
+						msg:'你确定要删除?'
+					}
+				},
+				onError: function(index,row){
+					$.messager.show({
+						title:'消息',
+						msg:row.msg,
+						timeout:5000,
+						showType:'slide'
+					});	
+			    },
+			    onBeforeSave: function(index){
+			    	//alert(index);
+			    	//return false;
+			    }
+			});
+		});
+	</script>
+	
+	<a href="#" title="This is the Editable DataGrid." class="easyui-tooltip">Hover me</a>
+	<h1>Editable DataGrid</h1>
+	<div style="margin-bottom:10px">
+		<a href="#" onclick="javascript:$('#tt').edatagrid('addRow',0)">AddRow</a>
+		<a href="#" onclick="javascript:$('#tt').edatagrid('saveRow')">SaveRow</a>
+		<a href="#" onclick="javascript:$('#tt').edatagrid('cancelRow')">CancelRow</a>
+		<a href="#" onclick="javascript:$('#tt').edatagrid('destroyRow')">destroyRow</a>
+	</div>
+	<table id="tt" style="width:600px;height:200px"
+			title="Editable DataGrid" singleSelect="true">
+		<thead>
+			<tr>
+				<th field="id" width="100" editor="{type:'validatebox',options:{required:true}}">Item ID</th>
+				<th field="productid" width="100" editor="text">Product ID</th>
+				<th field="listprice" width="100" align="right" editor="{type:'numberbox',options:{precision:1,min:0,max:100}}">List Price</th>
+				<th field="unitcost" width="100" align="right" editor="numberbox">Unit Cost</th>
+				<th field="attr1" width="150" editor="text">Attribute</th>
+			</tr>
+		</thead>
+	</table>
+</body>
+</html>
